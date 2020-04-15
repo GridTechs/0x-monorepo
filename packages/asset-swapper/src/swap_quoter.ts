@@ -565,19 +565,33 @@ export class SwapQuoter {
 
         let swapQuote: SwapQuote;
 
+        const enableRfqtIndicativeQuotes =
+            opts.rfqt &&
+            !opts.rfqt.intentOnFilling &&
+            opts.rfqt.apiKey &&
+            this._rfqtTakerApiKeyWhitelist.includes(opts.rfqt.apiKey);
+
         if (marketOperation === MarketOperation.Buy) {
             swapQuote = await this._swapQuoteCalculator.calculateMarketBuySwapQuoteAsync(
                 orders,
                 assetFillAmount,
                 gasPrice,
-                opts,
+                // tslint:disable-next-line:no-object-literal-type-assertion
+                {
+                    ...opts,
+                    quoteRequestor: enableRfqtIndicativeQuotes ? this._quoteRequestor : undefined,
+                } as Extract<SwapQuoteRequestOpts, GetMarketOrdersOpts>,
             );
         } else {
             swapQuote = await this._swapQuoteCalculator.calculateMarketSellSwapQuoteAsync(
                 orders,
                 assetFillAmount,
                 gasPrice,
-                opts,
+                // tslint:disable-next-line:no-object-literal-type-assertion
+                {
+                    ...opts,
+                    quoteRequestor: enableRfqtIndicativeQuotes ? this._quoteRequestor : undefined,
+                } as Extract<SwapQuoteRequestOpts, GetMarketOrdersOpts>,
             );
         }
 
